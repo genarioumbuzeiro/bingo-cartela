@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Cartela de Bingo</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+table {
+  margin: auto;
+  border-collapse: collapse;
+}
+th, td {
+  border: 1px solid #000;
+  width: 60px;
+  height: 60px;
+  font-size: 22px;
+  text-align: center;
+}
+th {
+  background: #ddd;
+  font-size: 26px;
+}
+</style>
+</head>
+<body>
+
+<h2 id="titulo"></h2>
+
+<table>
+<thead>
+<tr>
+  <th>B</th><th>I</th><th>N</th><th>G</th><th>O</th>
+</tr>
+</thead>
+<tbody id="corpo"></tbody>
+</table>
+
+<script>
+const p = new URLSearchParams(window.location.search);
+const dados = JSON.parse(atob(p.get("d")));
+
+document.getElementById("titulo").innerText =
+  "Cartela Nº " + dados.id;
+
+const tbody = document.getElementById("corpo");
+
+for (let l = 0; l < 5; l++) {
+  const tr = document.createElement("tr");
+  for (let c = 0; c < 5; c++) {
+    const td = document.createElement("td");
+    td.innerText = dados.numeros[l][c] === 0 ? "★" : dados.numeros[l][c];
+    tr.appendChild(td);
+  }
+  tbody.appendChild(tr);
+}
+</script>
+
+</body>
+</html>
