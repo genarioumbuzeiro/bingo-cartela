@@ -1,58 +1,141 @@
-const payload = getParam("d");
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Cartela</title>
 
-if (!payload) {
-  document.getElementById("titulo").innerText = "Cartela não disponível";
-  tabela.innerHTML = "<tr><td colspan='5'>Leia um QR code válido</td></tr>";
-} else {
-  const json = atob(payload);
-  const data = JSON.parse(json);
-
-  document.getElementById("titulo").innerText = "Cartela Nº " + data.id;
-
-  const storageKey = "bingo_cartela_" + data.id;
-  let marcados = JSON.parse(localStorage.getItem(storageKey) || "[]");
-
-  const letras = ["B","I","N","G","O"];
-  let html = "<tr>";
-  letras.forEach(l => html += `<th>${l}</th>`);
-  html += "</tr>";
-
-  for (let l = 0; l < 5; l++) {
-    html += "<tr>";
-    for (let c = 0; c < 5; c++) {
-      let n = data.numeros[l][c];
-      let txt = n === 0 ? "★" : n;
-      let marcado = marcados.includes(n) ? "marcado" : "";
-      let centro = (l === 2 && c === 2) ? "centro" : "";
-
-      html += `<td class="${marcado} ${centro}" onclick="toggle(${n}, this)">${txt}</td>`;
-    }
-    html += "</tr>";
-  }
-
-  tabela.innerHTML = html;
-
-  function toggle(n, td) {
-    if (n === 0) return;
-
-    let i = marcados.indexOf(n);
-    if (i >= 0) {
-      marcados.splice(i, 1);
-      td.classList.remove("marcado");
-    } else {
-      marcados.push(n);
-      td.classList.add("marcado");
-    }
-
-    localStorage.setItem(storageKey, JSON.stringify(marcados));
-  }
-
-  // Botão reiniciar
-  document.getElementById("reiniciarBtn").addEventListener("click", () => {
-    marcados = [];
-    localStorage.removeItem(storageKey);
-    document.querySelectorAll("#cartela td").forEach(td => {
-      td.classList.remove("marcado");
-    });
-  });
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial;
+  background: #f2f2f2;
+  text-align: center;
 }
+
+h2 {
+  margin: 12px 0;
+}
+
+#container {
+  max-width: 420px;
+  margin: auto;
+  padding: 10px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,.2);
+}
+
+th {
+  background: #222;
+  color: white;
+  font-size: 22px;
+  padding: 10px 0;
+}
+
+td {
+  border: 1px solid #ddd;
+  font-size: 26px;
+  font-weight: bold;
+  height: 64px;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+td:hover {
+  background: #eee;
+}
+
+td.marcado {
+  background: #4CAF50;
+  color: white;
+  transform: scale(0.95);
+}
+
+td.centro {
+  background: #FFD700;
+}
+
+.info {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+</style>
+</head>
+<body>
+
+<div id="container">
+  <h2 id="titulo"></h2>
+  <div class="info">Toque no número para marcar</div>
+
+  <table id="cartela"></table>
+</div>
+
+<script>
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+const payload = getParam("d");
+const json = atob(payload);
+const data = JSON.parse(json);
+
+document.getElementById("titulo").innerText =
+  "Cartela Nº " + data.id;
+
+const storageKey = "bingo_cartela_" + data.id;
+let marcados = JSON.parse(
+  localStorage.getItem(storageKey) || "[]"
+);
+
+const letras = ["B","I","N","G","O"];
+const tabela = document.getElementById("cartela");
+
+let html = "<tr>";
+letras.forEach(l => html += `<th>${l}</th>`);
+html += "</tr>";
+
+for (let l = 0; l < 5; l++) {
+  html += "<tr>";
+  for (let c = 0; c < 5; c++) {
+    let n = data.numeros[l][c];
+    let txt = n === 0 ? "★" : n;
+    let marcado = marcados.includes(n) ? "marcado" : "";
+    let centro = (l === 2 && c === 2) ? "centro" : "";
+
+    html += `
+      <td class="${marcado} ${centro}"
+          onclick="toggle(${n}, this)">
+        ${txt}
+      </td>`;
+  }
+  html += "</tr>";
+}
+
+tabela.innerHTML = html;
+
+function toggle(n, td) {
+  if (n === 0) return;
+
+  let i = marcados.indexOf(n);
+  if (i >= 0) {
+    marcados.splice(i, 1);
+    td.classList.remove("marcado");
+  } else {
+    marcados.push(n);
+    td.classList.add("marcado");
+  }
+
+  localStorage.setItem(storageKey, JSON.stringify(marcados));
+}
+</script>
+
+</body>
+</html>
