@@ -1,27 +1,32 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="utf-8">
-<title>Cartela de Bingo</title>
+<meta charset="utf-8" />
+<title>Minha Cartela</title>
+
 <style>
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   text-align: center;
 }
 table {
-  margin: auto;
   border-collapse: collapse;
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
 }
 th, td {
   border: 1px solid #000;
-  width: 60px;
-  height: 60px;
+  padding: 14px;
   font-size: 22px;
-  text-align: center;
 }
 th {
   background: #ddd;
-  font-size: 26px;
+}
+td.marcado {
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -29,32 +34,63 @@ th {
 
 <h2 id="titulo"></h2>
 
-<table>
-<thead>
-<tr>
-  <th>B</th><th>I</th><th>N</th><th>G</th><th>O</th>
-</tr>
-</thead>
-<tbody id="corpo"></tbody>
-</table>
+<table id="cartela"></table>
 
 <script>
-const p = new URLSearchParams(window.location.search);
-const dados = JSON.parse(atob(p.get("d")));
+function getParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+const payload = getParam("d");
+const json = atob(payload);
+const data = JSON.parse(json);
 
 document.getElementById("titulo").innerText =
-  "Cartela Nº " + dados.id;
+  "Cartela Nº " + data.id;
 
-const tbody = document.getElementById("corpo");
+const storageKey = "bingo_cartela_" + data.id;
+let marcados = JSON.parse(
+  localStorage.getItem(storageKey) || "[]"
+);
+
+const tabela = document.getElementById("cartela");
+
+const letras = ["B","I","N","G","O"];
+
+let html = "<tr>";
+letras.forEach(l => html += "<th>"+l+"</th>");
+html += "</tr>";
 
 for (let l = 0; l < 5; l++) {
-  const tr = document.createElement("tr");
+  html += "<tr>";
   for (let c = 0; c < 5; c++) {
-    const td = document.createElement("td");
-    td.innerText = dados.numeros[l][c] === 0 ? "★" : dados.numeros[l][c];
-    tr.appendChild(td);
+    let n = data.numeros[l][c];
+    let txt = n === 0 ? "★" : n;
+
+    let marcado = marcados.includes(n) ? "marcado" : "";
+
+    html += `<td class="${marcado}" onclick="toggle(${n}, this)">
+              ${txt}
+            </td>`;
   }
-  tbody.appendChild(tr);
+  html += "</tr>";
+}
+
+tabela.innerHTML = html;
+
+function toggle(n, td) {
+  if (n === 0) return;
+
+  let i = marcados.indexOf(n);
+  if (i >= 0) {
+    marcados.splice(i, 1);
+    td.classList.remove("marcado");
+  } else {
+    marcados.push(n);
+    td.classList.add("marcado");
+  }
+
+  localStorage.setItem(storageKey, JSON.stringify(marcados));
 }
 </script>
 
